@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Cst4380wRegistrationApplication  {  
 
 	public static void main(String[] args) {
-		// Springboot app
 		SpringApplication.run(Cst4380wRegistrationApplication.class, args);
 	}
 
