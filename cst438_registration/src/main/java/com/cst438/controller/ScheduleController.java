@@ -1,6 +1,7 @@
 package com.cst438.controller;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,7 +68,11 @@ public class ScheduleController {
 		// student.status
 		// = 0  ok to register.  != 0 registration is on hold.		
 		if (student!= null && course!=null && student.getStatusCode()==0) {
-			// TODO check that today's date is not past add deadline for the course.
+			LocalDateTime todays_date = LocalDateTime.now();
+			LocalDateTime add_drop_date = LocalDateTime.of(2023, 9, 7, 0, 0);
+			if (todays_date.isAfter(add_drop_date)) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Past add/drop deadline. ");
+			}
 			Enrollment enrollment = new Enrollment();
 			enrollment.setStudent(student);
 			enrollment.setCourse(course);
@@ -89,8 +94,13 @@ public class ScheduleController {
 	@Transactional
 	public void dropCourse(  @PathVariable int enrollment_id  ) {
 		String student_email = "test@csumb.edu";   // student's email 
-		// TODO  check that today's date is not past deadline to drop course.
 		Enrollment enrollment = enrollmentRepository.findById(enrollment_id).orElse(null);
+		LocalDateTime todays_date = LocalDateTime.now();
+		LocalDateTime add_drop_date = LocalDateTime.of(2023, 9, 7, 0, 0);
+		if (todays_date.isAfter(add_drop_date)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Past add/drop deadline. " + enrollment_id);
+		}
+		
 		// verify that student is enrolled in the course.
 		if (enrollment!=null && enrollment.getStudent().getEmail().equals(student_email)) {
 			// OK.  drop the course.
