@@ -37,7 +37,7 @@ public class StudentController {
 	@Autowired
 	GradebookService gradebookService;
 	
-	@PostMapping("student/add")
+	@PostMapping("/student/add")
 	@Transactional
 	public StudentDTO addStudent( @RequestParam("name") String name, @RequestParam("email") String email,
 			@RequestParam("status_code") int status_code, @RequestParam("status") String status) {
@@ -52,14 +52,46 @@ public class StudentController {
 		Student student = studentRepository.findByEmail(student_email);
 		
 		if (student != null && student.getEmail().equals(student_email)) {
-			if (forceDelete) {
-				studentRepository.delete(student);
-				return;
+			Iterable<Course> courses = courseRepository.findAll();
+			for (Course course: courses) {
+				Enrollment enrollment = enrollmentRepository.findByEmailAndCourseId(student_email, course.getCourse_id());
+				if (enrollment != null) {
+					if (!forceDelete) {
+						System.out.println("Enrollment will be deleted: " + enrollment.getEnrollment_id());
+					}
+					enrollmentRepository.delete(enrollment);
+				}
 			}
+			studentRepository.delete(student);
 		}
 	}
 	
-	// TODO: Update student - GET // POST
+	@GetMapping("/student")
+	public Student getStudent(@RequestParam("student_email") String student_email, @RequestParam("first_name") String first_name) {
+		Student student = studentRepository.findByEmail(student_email);
+		if (student != null) {
+			return student;
+		}
+		throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Student email not valid: "+student_email);
+	}
 	
-	// TODO: List students - GET
+	@PostMapping("/student/edit")
+	public StudentDTO editStudent(@RequestParam("name") String name, @RequestParam("email") String email,
+			@RequestParam("status_code") int status_code, @RequestParam("status") String status) {
+		Student student = studentRepository.findByEmail(email);
+		if (student != null) {
+			student.setName(name);
+			student.setStatus(status);
+			student.setStatusCode(status_code);
+			StudentDTO studentDTO = new StudentDTO(name, email, status_code, status);
+			return studentDTO;
+		}
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student email not valid: " + email);
+	}
+	
+	@GetMapping("/student/all")
+	public Iterable<Student> getAllStudents() {
+		Iterable<Student> students = studentRepository.findAll();
+		return students;
+	}
 }
