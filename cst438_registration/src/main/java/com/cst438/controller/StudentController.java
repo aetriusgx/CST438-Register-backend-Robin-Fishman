@@ -18,6 +18,7 @@ import com.cst438.domain.Enrollment;
 import com.cst438.domain.EnrollmentRepository;
 import com.cst438.domain.ScheduleDTO;
 import com.cst438.domain.Student;
+import com.cst438.domain.StudentDTO;
 import com.cst438.domain.StudentRepository;
 import com.cst438.service.GradebookService;
 
@@ -36,13 +37,29 @@ public class StudentController {
 	@Autowired
 	GradebookService gradebookService;
 	
-	// TODO: Add student
+	@PostMapping("student/add")
+	@Transactional
+	public StudentDTO addStudent( @RequestParam("name") String name, @RequestParam("email") String email,
+			@RequestParam("status_code") int status_code, @RequestParam("status") String status) {
+		StudentDTO newStudent = new StudentDTO(name, email, status_code, status);
+		return newStudent;
+	}
 	
-	// TODO: Delete student
-	// TODO: Add force param
 	// TODO: Warn before deleting
+	@DeleteMapping("/student/{student_email}")
+	@Transactional
+	public void dropStudent(@PathVariable String student_email, @RequestParam("force") boolean forceDelete) {
+		Student student = studentRepository.findByEmail(student_email);
+		
+		if (student != null && student.getEmail().equals(student_email)) {
+			if (forceDelete) {
+				studentRepository.delete(student);
+				return;
+			}
+		}
+	}
 	
-	// TODO: Update student
+	// TODO: Update student - GET // POST
 	
-	// TODO: List students
+	// TODO: List students - GET
 }
