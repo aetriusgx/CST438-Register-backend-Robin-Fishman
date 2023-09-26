@@ -93,13 +93,13 @@ public class StudentController {
 	}
 	
 	@GetMapping("/student/all")
-	public List<StudentDTO> getAllStudents() {
+	public StudentDTO[] getAllStudents() {
 		Iterable<Student> students = studentRepository.findAll();
-		List<StudentDTO> studentList = new ArrayList<StudentDTO>();
+		ArrayList<StudentDTO> studentList = new ArrayList<StudentDTO>();
 		for (Student student: students) {
 			studentList.add(new StudentDTO(student.getEmail(), student.getName(), student.getStatusCode(), student.getStatus()));
 		}
-		return studentList;
+		return studentList.toArray(new StudentDTO[studentList.size()]);
 	}
 	
 	private StudentDTO toStudentDTO(Student student) {
