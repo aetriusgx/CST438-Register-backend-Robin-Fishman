@@ -1,5 +1,8 @@
 package com.cst438.controller;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,10 +70,10 @@ public class StudentController {
 	}
 	
 	@GetMapping("/student")
-	public Student getStudent(@RequestParam("student_email") String student_email, @RequestParam("first_name") String first_name) {
+	public StudentDTO getStudent(@RequestParam("student_email") String student_email, @RequestParam("first_name") String first_name) {
 		Student student = studentRepository.findByEmail(student_email);
 		if (student != null) {
-			return student;
+			return toStudentDTO(student);
 		}
 		throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Student email not valid: "+student_email);
 	}
@@ -90,8 +93,16 @@ public class StudentController {
 	}
 	
 	@GetMapping("/student/all")
-	public Iterable<Student> getAllStudents() {
+	public List<StudentDTO> getAllStudents() {
 		Iterable<Student> students = studentRepository.findAll();
-		return students;
+		List<StudentDTO> studentList = new ArrayList<StudentDTO>();
+		for (Student student: students) {
+			studentList.add(new StudentDTO(student.getEmail(), student.getName(), student.getStatusCode(), student.getStatus()));
+		}
+		return studentList;
+	}
+	
+	private StudentDTO toStudentDTO(Student student) {
+		return new StudentDTO(student.getEmail(), student.getName(), student.getStatusCode(), student.getStatus());
 	}
 }
