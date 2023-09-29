@@ -90,7 +90,7 @@ public class StudentController {
 		throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Student email not valid: "+student_email);
 	}
 	
-	@PostMapping("/student/edit")
+	@PutMapping("/student/edit")
 	@Transactional
 	public StudentDTO editStudent(@RequestParam("email") String email, @RequestParam("name") String name, 
 			@RequestParam("status_code") int status_code, @RequestParam("status") String status) {
