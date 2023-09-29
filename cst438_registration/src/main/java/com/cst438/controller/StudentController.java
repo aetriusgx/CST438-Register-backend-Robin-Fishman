@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,11 +45,22 @@ public class StudentController {
 	@Transactional
 	public StudentDTO addStudent( @RequestParam("name") String name, @RequestParam("email") String email,
 			@RequestParam("status_code") int status_code, @RequestParam("status") String status) {
+		if (studentRepository.findByEmail(email) != null) {
+			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Student email not valid: "+email);
+		}
+		Student student = new Student();
+		student.setEmail(email);
+		student.setName(name);
+		student.setStatus(status);
+		student.setStatusCode(status_code);
+		studentRepository.save(student);
+		
 		StudentDTO newStudent = new StudentDTO(name, email, status_code, status);
+
 		return newStudent;
 	}
-	
-	// TODO: Warn before deleting
+
+
 	@DeleteMapping("/student/{student_email}")
 	@Transactional
 	public void dropStudent(@PathVariable String student_email, @RequestParam("force") boolean forceDelete) {
@@ -79,13 +91,15 @@ public class StudentController {
 	}
 	
 	@PostMapping("/student/edit")
-	public StudentDTO editStudent(@RequestParam("name") String name, @RequestParam("email") String email,
+	@Transactional
+	public StudentDTO editStudent(@RequestParam("email") String email, @RequestParam("name") String name, 
 			@RequestParam("status_code") int status_code, @RequestParam("status") String status) {
 		Student student = studentRepository.findByEmail(email);
 		if (student != null) {
 			student.setName(name);
 			student.setStatus(status);
 			student.setStatusCode(status_code);
+			studentRepository.save(student);
 			StudentDTO studentDTO = new StudentDTO(name, email, status_code, status);
 			return studentDTO;
 		}
