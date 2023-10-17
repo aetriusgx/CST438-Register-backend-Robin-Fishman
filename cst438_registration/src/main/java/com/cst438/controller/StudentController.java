@@ -1,11 +1,15 @@
 package com.cst438.controller;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,11 +45,22 @@ public class StudentController {
 	@Transactional
 	public StudentDTO addStudent( @RequestParam("name") String name, @RequestParam("email") String email,
 			@RequestParam("status_code") int status_code, @RequestParam("status") String status) {
+		if (studentRepository.findByEmail(email) != null) {
+			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Student email not valid: "+email);
+		}
+		Student student = new Student();
+		student.setEmail(email);
+		student.setName(name);
+		student.setStatus(status);
+		student.setStatusCode(status_code);
+		studentRepository.save(student);
+		
 		StudentDTO newStudent = new StudentDTO(name, email, status_code, status);
+
 		return newStudent;
 	}
-	
-	// TODO: Warn before deleting
+
+
 	@DeleteMapping("/student/{student_email}")
 	@Transactional
 	public void dropStudent(@PathVariable String student_email, @RequestParam("force") boolean forceDelete) {
@@ -67,22 +82,24 @@ public class StudentController {
 	}
 	
 	@GetMapping("/student")
-	public Student getStudent(@RequestParam("student_email") String student_email, @RequestParam("first_name") String first_name) {
+	public StudentDTO getStudent(@RequestParam("student_email") String student_email, @RequestParam("first_name") String first_name) {
 		Student student = studentRepository.findByEmail(student_email);
 		if (student != null) {
-			return student;
+			return toStudentDTO(student);
 		}
 		throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Student email not valid: "+student_email);
 	}
 	
-	@PostMapping("/student/edit")
-	public StudentDTO editStudent(@RequestParam("name") String name, @RequestParam("email") String email,
+	@PutMapping("/student/edit")
+	@Transactional
+	public StudentDTO editStudent(@RequestParam("email") String email, @RequestParam("name") String name, 
 			@RequestParam("status_code") int status_code, @RequestParam("status") String status) {
 		Student student = studentRepository.findByEmail(email);
 		if (student != null) {
 			student.setName(name);
 			student.setStatus(status);
 			student.setStatusCode(status_code);
+			studentRepository.save(student);
 			StudentDTO studentDTO = new StudentDTO(name, email, status_code, status);
 			return studentDTO;
 		}
@@ -90,8 +107,16 @@ public class StudentController {
 	}
 	
 	@GetMapping("/student/all")
-	public Iterable<Student> getAllStudents() {
+	public StudentDTO[] getAllStudents() {
 		Iterable<Student> students = studentRepository.findAll();
-		return students;
+		ArrayList<StudentDTO> studentList = new ArrayList<StudentDTO>();
+		for (Student student: students) {
+			studentList.add(new StudentDTO(student.getEmail(), student.getName(), student.getStatusCode(), student.getStatus()));
+		}
+		return studentList.toArray(new StudentDTO[studentList.size()]);
+	}
+	
+	private StudentDTO toStudentDTO(Student student) {
+		return new StudentDTO(student.getEmail(), student.getName(), student.getStatusCode(), student.getStatus());
 	}
 }
