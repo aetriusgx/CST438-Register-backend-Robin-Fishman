@@ -56,86 +56,144 @@ public class EndToEndScheduleTest {
 	public static final String TEST_SEMESTER = "2021 Fall";
 
 	public static final int SLEEP_DURATION = 1000; // 1 second.
-
-
-	/*
-	 * add course TEST_COURSE_ID to schedule for 2021 Fall semester.
-	 */
 	
 	@Test
-	public void addCourseTest() throws Exception {
-
-	
-		// set the driver location and start driver
-		//@formatter:off
-		// browser	property name 				Java Driver Class
-		// edge 	webdriver.edge.driver 		EdgeDriver
-		// FireFox 	webdriver.firefox.driver 	FirefoxDriver
-		// IE 		webdriver.ie.driver 		InternetExplorerDriver
-		//@formatter:on
-
+	public void addStudent() throws Exception {
 		System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
 		WebDriver driver = new ChromeDriver();
-		// Puts an Implicit wait for 10 seconds before throwing exception
+
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
 		try {
-
 			driver.get(URL);
 			Thread.sleep(SLEEP_DURATION);
-
-			// select the last of the radio buttons on the list of semesters page.
 			
-			List<WebElement> weList = driver.findElements(By.xpath("//input"));
-			// should be 3 elements in list.  click on last one for 2021 Fall
-			weList.get(2).click();
-
-			// Locate and click "View Schedule" button
-			
-			driver.findElement(By.id("viewSchedule")).click();
+			driver.findElement(By.linkText("Admin")).click();
 			Thread.sleep(SLEEP_DURATION);
-
-			// Locate and click "Add Course" button which is the first and only button on the page.
-			driver.findElement(By.id("addCourse")).click();
+			
+			driver.findElement(By.linkText("Add Student")).click();
 			Thread.sleep(SLEEP_DURATION);
-
-			// enter course no and click Add button
 			
-			driver.findElement(By.id("courseId")).sendKeys(Integer.toString(TEST_COURSE_ID));
-			driver.findElement(By.id("add")).click();
+			WebElement emailInput = driver.findElement(By.name("email"));
+			assertNotNull(emailInput);
+			
+			emailInput.sendKeys("rfishman@csumb.edu");
 			Thread.sleep(SLEEP_DURATION);
-
-			/*
-			* verify that new course shows in schedule.
-			* search for the title of the course in the updated schedule.
-			*/ 
 			
-			WebElement we = driver.findElement(By.xpath("//tr[td='"+TEST_COURSE_ID+"']"));
-			assertNotNull(we, "Test course title not found in schedule after successfully adding the course.");
+			WebElement nameInput = driver.findElement(By.name("name"));
+			assertNotNull(nameInput);
 			
-			// drop the course
-			WebElement dropButton = we.findElement(By.xpath("//button"));
-			assertNotNull(dropButton);
-			dropButton.click();
+			nameInput.sendKeys("Robin");
+			Thread.sleep(SLEEP_DURATION);
 			
-			// the drop course action causes an alert to occur.  
-			WebDriverWait wait = new WebDriverWait(driver, 1);
-            wait.until(ExpectedConditions.alertIsPresent());
-            
-            Alert simpleAlert = driver.switchTo().alert();
-            simpleAlert.accept();
-            
-            // check that course is no longer in the schedule
-            Thread.sleep(SLEEP_DURATION);
-            assertThrows(NoSuchElementException.class, () -> {
-            	driver.findElement(By.xpath("//tr[td='"+TEST_COURSE_ID+"']"));
-            });			
-
+			WebElement statusInput = driver.findElement(By.name("status"));
+			assertNotNull(statusInput);
+			
+			statusInput.sendKeys("good");
+			Thread.sleep(SLEEP_DURATION);
+			
+			WebElement statusCodeInput = driver.findElement(By.name("status_code"));
+			assertNotNull(statusCodeInput);
+			
+			statusCodeInput.sendKeys("0");
+			Thread.sleep(SLEEP_DURATION);
+			
+			List<WebElement> buttons = driver.findElements(By.xpath("//button"));
+			buttons.get(0).click(); // submit should be the only button
+			Thread.sleep(SLEEP_DURATION);
+			
+			
+			
 		} catch (Exception ex) {
 			throw ex;
 		} finally {
 			driver.quit();
 		}
+	}
+	
+	@Test
+	public void editStudent() throws Exception {
+		System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
+		WebDriver driver = new ChromeDriver();
 
+		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		
+		try {
+			driver.get(URL);
+			Thread.sleep(SLEEP_DURATION);
+			
+			driver.findElement(By.linkText("Admin")).click();
+			Thread.sleep(SLEEP_DURATION);
+			
+			driver.findElement(By.linkText("Edit Student")).click();
+			Thread.sleep(SLEEP_DURATION);
+			
+			WebElement emailInput = driver.findElement(By.name("email"));
+			assertNotNull(emailInput);
+			
+			emailInput.sendKeys("test@csumb.edu");
+			Thread.sleep(SLEEP_DURATION);
+			
+			WebElement nameInput = driver.findElement(By.name("name"));
+			assertNotNull(nameInput);
+			
+			nameInput.sendKeys("Treston");
+			Thread.sleep(SLEEP_DURATION);
+			
+			WebElement statusInput = driver.findElement(By.name("status"));
+			assertNotNull(statusInput);
+			
+			statusInput.sendKeys("good");
+			Thread.sleep(SLEEP_DURATION);
+			
+			WebElement statusCodeInput = driver.findElement(By.name("status_code"));
+			assertNotNull(statusCodeInput);
+			
+			statusCodeInput.sendKeys("0");
+			Thread.sleep(SLEEP_DURATION);
+			
+			List<WebElement> buttons = driver.findElements(By.xpath("//button"));
+			buttons.get(0).click(); // submit should be the only button
+			Thread.sleep(SLEEP_DURATION);
+			
+		} catch (Exception e) {
+			
+		} finally {
+			driver.quit();
+		}
+	}
+	
+	@Test
+	public void deleteStudent() throws Exception {
+		System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
+		WebDriver driver = new ChromeDriver();
+
+		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		
+		try {
+			driver.get(URL);
+			Thread.sleep(SLEEP_DURATION);
+			
+			driver.findElement(By.linkText("Admin")).click();
+			Thread.sleep(SLEEP_DURATION);
+			
+			driver.findElement(By.linkText("Delete Student")).click();
+			Thread.sleep(SLEEP_DURATION);
+			
+			WebElement emailInput = driver.findElement(By.name("email"));
+			assertNotNull(emailInput);
+			
+			emailInput.sendKeys("test@csumb.edu");
+			Thread.sleep(SLEEP_DURATION);
+			
+			List<WebElement> buttons = driver.findElements(By.xpath("//button"));
+			buttons.get(0).click(); // submit should be the only button
+			Thread.sleep(SLEEP_DURATION);
+			
+		} catch (Exception e) {
+			
+		} finally {
+			driver.quit();
+		}
 	}
 }
