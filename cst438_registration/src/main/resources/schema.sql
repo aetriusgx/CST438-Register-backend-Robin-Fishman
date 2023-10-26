@@ -34,3 +34,13 @@ CREATE TABLE enrollment (
   FOREIGN KEY (student_id) REFERENCES student (student_id) on delete cascade 
 );
 
+CREATE TABLE user (
+	user_id int NOT NULL AUTO_INCREMENT,
+	email varchar(255) NOT NULL,
+	password varchar(100) NOT NULL,
+	role varchar(10) NOT NULL,
+	
+	PRIMARY KEY (user_id),
+	FOREIGN KEY (user_id) REFERENCES student (student_id) on delete cascade,
+	FOREIGN KEY (email) REFERENCES student (email) on delete cascade
+);
